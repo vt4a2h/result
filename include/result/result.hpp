@@ -12,11 +12,13 @@ public: // Types
     using Error = E;
 
 public:
-    explicit Result(const Value& v): data(v) {}
-    explicit Result(Value&& v): data(std::move(v)) {}
+    // NOLINTBEGIN
+    Result(const Value& v): data(v) {}
+    Result(Value&& v): data(std::move(v)) {}
 
-    explicit Result(const Error& e): data(e) {}
-    explicit Result(Error&& e): data(std::move(e)) {}
+    Result(const Error& e): data(e) {}
+    Result(Error&& e): data(std::move(e)) {}
+    // NOLINTEND
 
     Result(const Result& src): data(src.data) {}
     Result(Result&& src) noexcept: data(std::move(src).data) {}
