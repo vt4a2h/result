@@ -15,12 +15,11 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     
     include(CTest)
+
+    if(BUILD_TESTING)
+        enable_testing()
+        add_subdirectory(test)
+    endif()
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-if(BUILD_TESTING)
-    enable_testing()
-    add_subdirectory(test)
-endif()
- 
