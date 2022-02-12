@@ -6,6 +6,8 @@ project(
     DESCRIPTION "A simple implementation of the Result type"
     LANGUAGES CXX
 )
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
   
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CXX_STANDARD 20)
@@ -21,5 +23,3 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         add_subdirectory(test)
     endif()
 endif()
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
