@@ -1,6 +1,6 @@
 find_package(Catch2 CONFIG REQUIRED)
 
-set(SOURCE_LIST CreateResultTest.cpp CheckStateTest.cpp GetDataTest.cpp)
+set(SOURCE_LIST CreateResultTest.cpp CheckStateTest.cpp GetDataTest.cpp ThenTest.cpp)
 
 add_executable(tests
     main.cpp
