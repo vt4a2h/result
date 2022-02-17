@@ -7,19 +7,29 @@
 namespace result {
 
 namespace details {
+
+    class ResultBase {};
+
     template <class F, class V, class ...Args>
     concept ThenIsInvocable = std::is_invocable_v<F, std::add_rvalue_reference_t<V>, Args...>;
 
-    template <class F, class R, class ...Args>
+    template <class F, class V, class ...Args>
     concept ThenProducesCorrectResult =
-        std::is_convertible_v<
-            std::invoke_result_t<F, std::add_rvalue_reference_t<typename R::Value>, Args...>,
-            R
+        std::is_base_of_v<
+            ResultBase,
+            std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...>
+        >;
+
+    template <class F, class V, class E, class ...Args>
+    concept ErrorIsConvertable =
+        std::convertible_to<
+            typename std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...>::Error,
+            E
         >;
 }
 
 template <class V, class E>
-class Result {
+class Result : public details::ResultBase {
 public: // Types
     using Value = V;
     using Error = E;
@@ -88,8 +98,9 @@ public:
     template<class F, class ...Args>
         requires
             details::ThenIsInvocable<F, Value, Args...> &&
-            details::ThenProducesCorrectResult<F, Result<V, E>, Args...>
-    Result then(F f, Args&&... args) {
+            details::ThenProducesCorrectResult<F, Value, Args...> &&
+            details::ErrorIsConvertable<F, Value, Error, Args...>
+    auto then(F f, Args&&... args) -> std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...> {
         if (hasValue())
             return std::invoke(f, std::move(*this).value(), std::forward<Args>(args)...);
 
