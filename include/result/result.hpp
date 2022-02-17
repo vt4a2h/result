@@ -2,6 +2,7 @@
 
 #include <variant>
 #include <cassert>
+#include <functional>
 
 namespace result {
 
