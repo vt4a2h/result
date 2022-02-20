@@ -11,10 +11,10 @@ namespace details {
     class ResultBase {};
 
     template <class F, class V, class ...Args>
-    concept ThenIsInvocable = std::is_invocable_v<F, std::add_rvalue_reference_t<V>, Args...>;
+    concept IsInvocable = std::is_invocable_v<F, std::add_rvalue_reference_t<V>, Args...>;
 
     template <class F, class V, class ...Args>
-    concept ThenProducesCorrectResult =
+    concept ProducesCorrectResult =
         std::is_base_of_v<
             ResultBase,
             std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...>
@@ -25,6 +25,13 @@ namespace details {
         std::convertible_to<
             typename std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...>::Error,
             E
+        >;
+
+    template <class F, class V, class E, class ...Args>
+    concept ValueIsConvertable =
+        std::convertible_to<
+            typename std::invoke_result_t<F, std::add_rvalue_reference_t<E>, Args...>::Value,
+            V
         >;
 }
 
@@ -97,14 +104,26 @@ public:
 
     template<class F, class ...Args>
         requires
-            details::ThenIsInvocable<F, Value, Args...> &&
-            details::ThenProducesCorrectResult<F, Value, Args...> &&
+            details::IsInvocable<F, Value, Args...> &&
+            details::ProducesCorrectResult<F, Value, Args...> &&
             details::ErrorIsConvertable<F, Value, Error, Args...>
     auto then(F f, Args&&... args) -> std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...> {
         if (hasValue())
             return std::invoke(f, std::move(*this).value(), std::forward<Args>(args)...);
 
         return std::move(*this).error();
+    }
+
+    template<class F, class ...Args>
+        requires
+            details::IsInvocable<F, Error, Args...> &&
+            details::ProducesCorrectResult<F, Error, Args...> &&
+            details::ValueIsConvertable<F, Value, Error, Args...>
+    [[nodiscard]] auto onError(F f, Args&&... args) -> std::invoke_result_t<F, std::add_rvalue_reference_t<E>, Args...> {
+        if (hasError())
+            return std::invoke(f, std::move(*this).error(), std::forward<Args>(args)...);
+
+        return std::move(*this).value();
     }
 
 private:
