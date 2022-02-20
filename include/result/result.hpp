@@ -107,7 +107,7 @@ public:
             details::IsInvocable<F, Value, Args...> &&
             details::ProducesCorrectResult<F, Value, Args...> &&
             details::ErrorIsConvertable<F, Value, Error, Args...>
-    auto then(F f, Args&&... args) -> std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...> {
+    [[nodiscard]] auto then(F f, Args&&... args) -> std::invoke_result_t<F, std::add_rvalue_reference_t<V>, Args...> {
         if (hasValue())
             return std::invoke(f, std::move(*this).value(), std::forward<Args>(args)...);
 
